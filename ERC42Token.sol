@@ -11,13 +11,25 @@ import "./zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
  *
  */
 
-contract ERC865Token is ERC865, ERC721Token {
+contract ERC865Token is  ERC721Token {
 
     /* Nonces of transfers performed */
     mapping(bytes => bool) signatures;
 
     event TransferPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
     event ApprovalPreSigned(address indexed from, address indexed to, address indexed delegate, uint256 amount, uint256 fee);
+    // Total amount of tokens
+    //  uint256 private totalTokens;
+    //Example of maintaining a variable token supply via minting
+    function mint(address _to) 
+    //onlyOwner 
+    //canMint 
+    public 
+    returns (bool) 
+    {
+            super._mint(_to, totalSupply()+1);
+    }
+
 
     /**
      * @notice Submit a presigned transfer
@@ -40,7 +52,7 @@ contract ERC865Token is ERC865, ERC721Token {
         require(_to != address(0));
         require(signatures[_signature] == false);
 
-        // bytes32 hashedTx = transferPreSignedHashing(address(this), _to, _value, _fee, _nonce);
+        bytes32 hashedTx = transferPreSignedHashing(address(this), _to,  _nonce);
 
         // address from = recover(hashedTx, _signature);
         // require(from != address(0));
@@ -60,8 +72,7 @@ contract ERC865Token is ERC865, ERC721Token {
      * @notice Submit a presigned approval
      * @param _signature bytes The signature, issued by the owner.
      * @param _spender address The address which will spend the funds.
-     * @param _value uint256 The amount of tokens to allow.
-     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+
      * @param _nonce uint256 Presigned transaction number.
      */
     function approvePreSigned(
@@ -215,15 +226,12 @@ contract ERC865Token is ERC865, ERC721Token {
      * @notice Hash (keccak256) of the payload used by transferPreSigned
      * @param _token address The address of the token.
      * @param _to address The address which you want to transfer to.
-     * @param _value uint256 The amount of tokens to be transferred.
-     * @param _fee uint256 The amount of tokens paid to msg.sender, by the owner.
+
      * @param _nonce uint256 Presigned transaction number.
      */
     function transferPreSignedHashing(
         address _token,
         address _to,
-        uint256 _value,
-        uint256 _fee,
         uint256 _nonce
     )
         public
@@ -231,7 +239,7 @@ contract ERC865Token is ERC865, ERC721Token {
         returns (bytes32)
     {
         /* "48664c16": transferPreSignedHashing(address,address,address,uint256,uint256,uint256) */
-        return keccak256(bytes4(0x48664c16), _token, _to, _value, _fee, _nonce);
+        return keccak256(bytes4(0x48664c16), _token, _to, _nonce);
     }
 
     /**

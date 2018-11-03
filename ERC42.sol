@@ -56,8 +56,7 @@ contract ERC865 is ERC721 {
         bytes _signature,
         address _from,
         address _to,
-        uint256 _value,
-        uint256 _fee,
+
         uint256 _nonce
     )
         public
